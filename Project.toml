@@ -1,0 +1,14 @@
+name = "SeriesAccelerators"
+uuid = "9dd7a2f8-ab8d-577c-ac83-a3992ff7c30e"
+authors = ["James Cook <cookjws@gmail.com>"]
+version = "0.2.1"
+
+[compat]
+julia = "1"
+
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test", "BenchmarkTools"]
