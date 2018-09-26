@@ -16,3 +16,6 @@ script:
   - julia --color=yes --check-bounds=yes -e 'using Pkg; Pkg.add("Test"); Pkg.add("BenchmarkTools"); Pkg.update(); include("test/runtests.jl")'
 
 
+after_success:
+  - julia -e 'cd(Pkg.dir("SeriesAccelerators.jl")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+
