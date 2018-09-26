@@ -17,5 +17,5 @@ script:
 
 
 after_success:
-  - julia -e 'cd(Pkg.dir("SeriesAccelerators.jl")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'cd(Pkg.dir("SeriesAccelerators")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
 
