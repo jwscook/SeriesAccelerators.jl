@@ -87,7 +87,7 @@ function vanwijngaarden(series::T,
 end
 
 function _vanwijngaarden(f::T, recursion::V, sum_limit::U
-                        ) where {T<:Function, U<:Int, V<:Int}
+    ) where {T<:Function, U<:Int, V<:Int}
   if recursion == 0
     return mapreduce(n -> f(n), +, 0:sum_limit)
   else
