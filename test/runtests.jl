@@ -1,7 +1,5 @@
-include("../src/SeriesAccelerators.jl")
+using SeriesAccelerators
 using Test, BenchmarkTools
-
-import Main: SeriesAccelerators
 
 @testset "Shanks" begin
   summand(x, i) = Float64(x^i / factorial(BigInt(i)))
