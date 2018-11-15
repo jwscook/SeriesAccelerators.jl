@@ -46,6 +46,12 @@ summand(x, i) = Float64(x^i / factorial(BigInt(i)))
 for x ∈ range(-10, stop=10, length=21)
   ta = @elapsed a = SeriesAccelerators.shanks(i->summand(x, i), 2, 20)[1]
   tb = @elapsed b = SeriesAccelerators.vanwijngaarden(i->summand(x, i), 10, 20)[1]
-  #r = exp(x)
-  #@show x, r, (a-r)/r,(b-r)/r, ta / tb
+end
+
+
+@testset "Vector results" begin
+  summand(x, i) = Float64(x^i / factorial(BigInt(i)))
+  accelerator = SeriesAccelerators.shanks
+  result = accelerator(i->[summand(0.0, i), 2*summand(0.0, i)], 0, 1)[1]
+  @test [exp(0.0), 2*exp(0.0)] ≈ result rtol=sqrt(eps())
 end
