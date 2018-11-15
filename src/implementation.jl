@@ -16,8 +16,11 @@ function check_convergence(t_new::Array{T, N}, t_old::Array{T, N},
 end
 
 const default_initial_iterate = 5
+const default_sum_limit = 1_000_000
+const default_recursion = 1
+
 function _seriesaccelerator(accelerator::T, series::U,
-    sum_limit::V, recursion::Int, initial_iterate::W,
+    recursion::Int, sum_limit::V, initial_iterate::W,
     rtol, atol) where {T<:Function, U<:Function, V<:Int, W<:Int}
   iterate = initial_iterate
   recursion = Int(min(iterate - 1, recursion))
@@ -25,7 +28,7 @@ function _seriesaccelerator(accelerator::T, series::U,
   isconverged = false
   while !isconverged && iterate < sum_limit
     iterate += 1
-    new_value = accelerator(series, iterate, recursion)
+    new_value = accelerator(series, recursion, iterate)
     isfinite(new_value) || break
     isconverged = check_convergence(new_value, old_value, rtol, atol)
     old_value = deepcopy(new_value)
@@ -41,17 +44,18 @@ function _memoise(f::T, data::Dict=Dict()) where {T<:Function}
   return fmemoised, data
 end
 
-
-function shanks(series::T, sum_limit::U, recursion::Int;
+function shanks(series::T,
+    recursion::Int=default_recursion,
+    sum_limit::U=default_sum_limit;
     rtol=default_rtol, atol=default_atol) where {T<:Function, U<:Int}
+  @assert 0 <= recursion <= sum_limit "$recursion, $sum_limit"
   memoisedseries, data = _memoise(series)
   f(n) = mapreduce(memoisedseries, +, 0:n)
-  return _seriesaccelerator(_shanks, f, sum_limit, recursion,
+  return _seriesaccelerator(_shanks, f, recursion, sum_limit,
     default_initial_iterate, rtol, atol)
 end
 
-function _shanks(f::T, sum_limit::U, recursion::Int) where {T<:Function, U<:Int}
-  @assert recursion >= 0 && sum_limit >= recursion
+function _shanks(f::T, recursion::Int, sum_limit::U) where {T<:Function, U<:Int}
   function _shanks_value(An1, An, An_1)
     denominator = ((An1 - An) - (An - An_1))
     iszero(denominator) && return An1 # then it's converged
@@ -63,29 +67,31 @@ function _shanks(f::T, sum_limit::U, recursion::Int) where {T<:Function, U<:Int}
     An_1 = f(sum_limit - 1)
     return _shanks_value(An1, An, An_1)
   else
-    An1 = _shanks(f, sum_limit + 1, recursion - 1)
-    An = _shanks(f, sum_limit, recursion - 1)
-    An_1 = _shanks(f, sum_limit - 1, recursion - 1)
+    An1 = _shanks(f, recursion - 1, sum_limit + 1)
+    An = _shanks(f, recursion - 1, sum_limit)
+    An_1 = _shanks(f, recursion - 1, sum_limit - 1)
     return _shanks_value(An1, An, An_1)
   end
   throw("Shouldn't be able to reach here")
 end
 
-function vanwijngaarden(series::T, sum_limit::U, 
-    recursion::Int=default_initial_iterate;
+function vanwijngaarden(series::T,
+    recursion::Int=default_recursion,
+    sum_limit::U=default_sum_limit;
     rtol=default_rtol, atol=default_atol) where {T<:Function, U<:Int}
+  @assert 0 <= recursion "$recursion"
+  @assert 0 < sum_limit "$sum_limit"
   memoisedseries, data = _memoise(series)
-  return _seriesaccelerator(_vanwijngaarden, memoisedseries, sum_limit,
-    recursion, default_initial_iterate, rtol, atol)
+  return _seriesaccelerator(_vanwijngaarden, memoisedseries, recursion,
+    sum_limit, default_initial_iterate, rtol, atol)
 end
 
-function _vanwijngaarden(f::T, sum_limit::U, recursion::V
-                        ) where {T<:Function, U<:Int, V<:Int}
-  @assert sum_limit > 0 && recursion >= 0
+function _vanwijngaarden(f::T, recursion::V, sum_limit::U
+    ) where {T<:Function, U<:Int, V<:Int}
   if recursion == 0
     return mapreduce(n -> f(n), +, 0:sum_limit)
   else
-    return 0.5 * mapreduce(k -> _vanwijngaarden(f, k, recursion-1),
+    return 0.5 * mapreduce(k -> _vanwijngaarden(f, recursion-1, k),
       +, [1, -1] .+ sum_limit)
   end
   throw("Shouldn't be able to reach here")

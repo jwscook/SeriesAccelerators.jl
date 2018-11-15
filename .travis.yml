@@ -8,12 +8,14 @@ julia:
   - 1.0
 matrix:
   allow_failures:
-    - julia: 1.0
 
 notifications:
   email: false
 
 script:
-  - julia --color=yes --check-bounds=yes -e 'using Pkg, Pkg.add("Test"), Pkg.add("BenchmarkTools"), Pkg.update(); include("test/runtests.jl")'
+  - julia --color=yes --check-bounds=yes -e 'using Pkg; Pkg.add("Test"); Pkg.add("BenchmarkTools"); Pkg.update(); Pkg.test("SeriesAccelerators", coverage=true)'
 
+
+after_success:
+  - julia -e 'using Pkg; cd(Pkg.dir("SeriesAccelerators")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
 
