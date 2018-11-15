@@ -22,16 +22,16 @@ const default_recursion = 1
 function _seriesaccelerator(accelerator::T, series::U,
     recursion::Int, sum_limit::V, initial_iterate::W,
     rtol, atol) where {T<:Function, U<:Function, V<:Int, W<:Int}
+  recursion = Int(min(initial_iterate - 1, recursion))
+  old_value = series(initial_iterate) #accelerator(series, iterate, recursion)
   iterate = initial_iterate
-  recursion = Int(min(iterate - 1, recursion))
-  old_value = series(iterate) #accelerator(series, iterate, recursion)
   isconverged = false
   while !isconverged && iterate < sum_limit
-    iterate += 1
     new_value = accelerator(series, recursion, iterate)
     isfinite(new_value) || break
     isconverged = check_convergence(new_value, old_value, rtol, atol)
     old_value = deepcopy(new_value)
+    iterate += 1
   end
   return old_value, isconverged
 end
