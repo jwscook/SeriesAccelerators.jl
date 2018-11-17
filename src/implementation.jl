@@ -1,6 +1,10 @@
 const default_atol = eps()
 const default_rtol = sqrt(eps())
 
+"""
+Check the convergence of series by comparing the new value to the
+value of the series so far
+"""
 function check_convergence(x_new::T, x_old::T,
     rtol=default_rtol, atol=default_atol) where {T <: Number, N}
   @assert !isnan(x_new) && !isnan(x_old) "x_new = $x_new, x_old = $x_old"
@@ -44,6 +48,18 @@ function _memoise(f::T, data::Dict=Dict()) where {T<:Function}
   return fmemoised, data
 end
 
+"""
+Shanks transformation series accelerator.
+https://en.wikipedia.org/wiki/Shanks_transformation
+
+Arguments:
+  series (optional, Function) : a function that accepts an argument, n::Int,
+    and returns the nth value in the series
+  sum_limit (optional, Int) : the value at which to stop the series
+    (default is 1,000,000)
+  rtol (optional, Number) : relative stopping tolerance
+  atol (optional, Number) : absolute stopping tolerance
+"""
 function shanks(series::T,
     recursion::Int=default_recursion,
     sum_limit::U=default_sum_limit;
@@ -75,6 +91,19 @@ function _shanks(f::T, recursion::Int, sum_limit::U) where {T<:Function, U<:Int}
   end
   throw("Shouldn't be able to reach here")
 end
+
+"""
+van Wijngaarden transformation series accelerator.
+https://en.wikipedia.org/wiki/Van_Wijngaarden_transformation
+
+Arguments:
+  series (optional, Function) : a function that accepts an argument, n::Int,
+    and returns the nth value in the series
+  sum_limit (optional, Int) : the value at which to stop the series
+    (default is 1,000,000)
+  rtol (optional, Number) : relative stopping tolerance
+  atol (optional, Number) : absolute stopping tolerance
+"""
 
 function vanwijngaarden(series::T,
     recursion::Int=default_recursion,
