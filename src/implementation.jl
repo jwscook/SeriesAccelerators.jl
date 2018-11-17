@@ -107,7 +107,6 @@ Arguments:
   rtol (optional, Number) : relative stopping tolerance
   atol (optional, Number) : absolute stopping tolerance
 """
-
 function vanwijngaarden(series::T,
     recursion::Int=default_recursion,
     sum_limit::U=default_sum_limit;
