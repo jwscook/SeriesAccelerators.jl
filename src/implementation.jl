@@ -49,6 +49,8 @@ function _memoise(f::T, data::Dict=Dict()) where {T<:Function}
 end
 
 """
+    shanks(series, recursion::Int=1, sum_limit::U=1_000_000; rtol=sqrt(eps()), atol=eps()) 
+
 Shanks transformation series accelerator.
 https://en.wikipedia.org/wiki/Shanks_transformation
 
@@ -93,6 +95,7 @@ function _shanks(f::T, recursion::Int, sum_limit::U) where {T<:Function, U<:Int}
 end
 
 """
+    vanwijngaarden(series, recursion::Int=1, sum_limit::U=1_000_000; rtol=sqrt(eps()), atol=eps()) 
 van Wijngaarden transformation series accelerator.
 https://en.wikipedia.org/wiki/Van_Wijngaarden_transformation
 
