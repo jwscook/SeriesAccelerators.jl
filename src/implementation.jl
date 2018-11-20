@@ -1,6 +1,10 @@
 const default_atol = eps()
 const default_rtol = sqrt(eps())
 
+"""
+Check the convergence of series by comparing the new value to the
+value of the series so far
+"""
 function check_convergence(x_new::T, x_old::T,
     rtol=default_rtol, atol=default_atol) where {T <: Number, N}
   @assert !isnan(x_new) && !isnan(x_old) "x_new = $x_new, x_old = $x_old"
@@ -26,11 +30,11 @@ function _seriesaccelerator(accelerator::T, series::U,
   old_value = series(iterate) #accelerator(series, iterate, recursion)
   isconverged = false
   while !isconverged && iterate < sum_limit
-    iterate += 1
     new_value = accelerator(series, recursion, iterate)
     any(isfinite.(new_value)) || break
     isconverged = check_convergence(new_value, old_value, rtol, atol)
     old_value = deepcopy(new_value)
+    iterate += 1
   end
   return old_value, isconverged
 end
@@ -43,6 +47,20 @@ function _memoise(f::T, data::Dict=Dict()) where {T<:Function}
   return fmemoised, data
 end
 
+"""
+    shanks(series, recursion::Int=1, sum_limit::U=1_000_000; rtol=sqrt(eps()), atol=eps()) 
+
+Shanks transformation series accelerator.
+https://en.wikipedia.org/wiki/Shanks_transformation
+
+Arguments:
+  series (optional, Function) : a function that accepts an argument, n::Int,
+    and returns the nth value in the series
+  sum_limit (optional, Int) : the value at which to stop the series
+    (default is 1,000,000)
+  rtol (optional, Number) : relative stopping tolerance
+  atol (optional, Number) : absolute stopping tolerance
+"""
 function shanks(series::T,
     recursion::Int=default_recursion,
     sum_limit::U=default_sum_limit;
@@ -50,6 +68,7 @@ function shanks(series::T,
   @assert 0 <= recursion <= sum_limit "$recursion, $sum_limit"
   sum_limit -= recursion + 1 # recursion effectively addes to sum_limit
   memoisedseries, data = _memoise(series)
+  sum_limit -= recursion # due to the way the shanks recursion changes the sum_limit
   f(n) = mapreduce(memoisedseries, +, 0:n)
   return _seriesaccelerator(_shanks, f, recursion, sum_limit, rtol, atol)
 end
@@ -74,6 +93,19 @@ function _shanks(f::T, recursion::Int, termindex::U) where {T<:Function, U<:Int}
   throw("Shouldn't be able to reach here")
 end
 
+"""
+    vanwijngaarden(series, recursion::Int=1, sum_limit::U=1_000_000; rtol=sqrt(eps()), atol=eps()) 
+van Wijngaarden transformation series accelerator.
+https://en.wikipedia.org/wiki/Van_Wijngaarden_transformation
+
+Arguments:
+  series (optional, Function) : a function that accepts an argument, n::Int,
+    and returns the nth value in the series
+  sum_limit (optional, Int) : the value at which to stop the series
+    (default is 1,000,000)
+  rtol (optional, Number) : relative stopping tolerance
+  atol (optional, Number) : absolute stopping tolerance
+"""
 function vanwijngaarden(series::T,
     recursion::Int=default_recursion,
     sum_limit::U=default_sum_limit;

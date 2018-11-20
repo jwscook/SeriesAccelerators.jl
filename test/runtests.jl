@@ -1,6 +1,6 @@
 using SeriesAccelerators
 using Test, BenchmarkTools
-import SpecialFunctions: lfactorial
+import SpecialFunctions: factorial
 
 @testset "Shanks" begin
   summand(x, i) = Float64(x^i / factorial(BigInt(i)))
