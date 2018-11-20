@@ -20,16 +20,15 @@ const default_sum_limit = 1_000_000
 const default_recursion = 1
 
 function _seriesaccelerator(accelerator::T, series::U,
-    recursion::Int, sum_limit::V, initial_iterate::W,
-    rtol, atol) where {T<:Function, U<:Function, V<:Int, W<:Int}
-  iterate = initial_iterate
-  recursion = Int(min(iterate - 1, recursion))
+    recursion::Int, sum_limit::V, rtol, atol
+    ) where {T<:Function, U<:Function, V<:Int, W<:Int}
+  iterate = max(default_initial_iterate, recursion + 1)
   old_value = series(iterate) #accelerator(series, iterate, recursion)
   isconverged = false
   while !isconverged && iterate < sum_limit
     iterate += 1
     new_value = accelerator(series, recursion, iterate)
-    isfinite(new_value) || break
+    any(isfinite.(new_value)) || break
     isconverged = check_convergence(new_value, old_value, rtol, atol)
     old_value = deepcopy(new_value)
   end
@@ -49,27 +48,27 @@ function shanks(series::T,
     sum_limit::U=default_sum_limit;
     rtol=default_rtol, atol=default_atol) where {T<:Function, U<:Int}
   @assert 0 <= recursion <= sum_limit "$recursion, $sum_limit"
+  sum_limit -= recursion + 1 # recursion effectively addes to sum_limit
   memoisedseries, data = _memoise(series)
   f(n) = mapreduce(memoisedseries, +, 0:n)
-  return _seriesaccelerator(_shanks, f, recursion, sum_limit,
-    default_initial_iterate, rtol, atol)
+  return _seriesaccelerator(_shanks, f, recursion, sum_limit, rtol, atol)
 end
 
-function _shanks(f::T, recursion::Int, sum_limit::U) where {T<:Function, U<:Int}
+function _shanks(f::T, recursion::Int, termindex::U) where {T<:Function, U<:Int}
   function _shanks_value(An1, An, An_1)
     denominator = ((An1 - An) - (An - An_1))
     iszero(denominator) && return An1 # then it's converged
-    return An1 - (An1 - An)^2/denominator
+    return An1 - (An1 - An)^2 / denominator
   end
   if recursion == 0
-    An1 = f(sum_limit + 1)
-    An = f(sum_limit + 0)
-    An_1 = f(sum_limit - 1)
+    An1 = f(termindex + 1)
+    An = f(termindex + 0)
+    An_1 = f(termindex - 1)
     return _shanks_value(An1, An, An_1)
   else
-    An1 = _shanks(f, recursion - 1, sum_limit + 1)
-    An = _shanks(f, recursion - 1, sum_limit)
-    An_1 = _shanks(f, recursion - 1, sum_limit - 1)
+    An1 = _shanks(f, recursion - 1, termindex + 1)
+    An = _shanks(f, recursion - 1, termindex)
+    An_1 = _shanks(f, recursion - 1, termindex - 1)
     return _shanks_value(An1, An, An_1)
   end
   throw("Shouldn't be able to reach here")
@@ -83,7 +82,7 @@ function vanwijngaarden(series::T,
   @assert 0 < sum_limit "$sum_limit"
   memoisedseries, data = _memoise(series)
   return _seriesaccelerator(_vanwijngaarden, memoisedseries, recursion,
-    sum_limit, default_initial_iterate, rtol, atol)
+    sum_limit, rtol, atol)
 end
 
 function _vanwijngaarden(f::T, recursion::V, sum_limit::U
