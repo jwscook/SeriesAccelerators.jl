@@ -13,7 +13,7 @@ notifications:
   email: false
 
 script:
-  - julia --color=yes --check-bounds=yes -e 'using Pkg; Pkg.add("Test"); Pkg.add("BenchmarkTools"); Pkg.update(); Pkg.test("SeriesAccelerators", coverage=true)'
+  - julia --color=yes --check-bounds=yes -e 'using Pkg; Pkg.add("Test"); Pkg.add("BenchmarkTools"); Pkg.add("SpecialFunctions"); Pkg.update(); Pkg.test("SeriesAccelerators", coverage=true)'
 
 
 after_success:
