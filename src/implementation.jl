@@ -27,7 +27,7 @@ function _seriesaccelerator(accelerator::T, series::U,
     recursion::Int, sum_limit::V, rtol, atol
     ) where {T<:Function, U<:Function, V<:Int, W<:Int}
   iterate = max(default_initial_iterate, recursion + 1)
-  old_value = series(iterate) #accelerator(series, iterate, recursion)
+  old_value = series(iterate)
   isconverged = false
   while !isconverged && iterate < sum_limit
     new_value = accelerator(series, recursion, iterate)
@@ -66,9 +66,8 @@ function shanks(series::T,
     sum_limit::U=default_sum_limit;
     rtol=default_rtol, atol=default_atol) where {T<:Function, U<:Int}
   @assert 0 <= recursion <= sum_limit "$recursion, $sum_limit"
-  sum_limit -= recursion + 1 # recursion effectively addes to sum_limit
   memoisedseries, data = _memoise(series)
-  sum_limit -= recursion # due to the way the shanks recursion changes the sum_limit
+  sum_limit -= recursion
   f(n) = mapreduce(memoisedseries, +, 0:n)
   return _seriesaccelerator(_shanks, f, recursion, sum_limit, rtol, atol)
 end
