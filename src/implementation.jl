@@ -39,9 +39,10 @@ function _seriesaccelerator(accelerator::T, series::U,
   return old_value, isconverged
 end
 
-function _memoise(f::T, data::Dict=Dict()) where {T<:Function}
-  function fmemoised(i...)
-    !haskey(data, i) && (data[i] = f(i...))
+function _memoise(f::T) where {T<:Function}
+  data = Dict(0 => f(0))
+  function fmemoised(i)
+    !haskey(data, i) && (data[i] = f(i))
     return data[i]
   end
   return fmemoised, data
