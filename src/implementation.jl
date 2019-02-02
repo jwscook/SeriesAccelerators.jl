@@ -40,9 +40,7 @@ function _seriesaccelerator(accelerator::T, series::U,
 end
 
 function _memoise(f::T) where {T<:Function}
-  zeroterm = f(0)
-  data = Dict{Int, typeof(zeroterm)}()
-  data[0] = zeroterm
+  data = Dict(0 => f(0))
   function fmemoised(i)
     !haskey(data, i) && (data[i] = f(i))
     return data[i]
