@@ -39,9 +39,12 @@ function _seriesaccelerator(accelerator::T, series::U,
   return old_value, isconverged
 end
 
-function _memoise(f::T, data::Dict=Dict()) where {T<:Function}
-  function fmemoised(i...)
-    !haskey(data, i) && (data[i] = f(i...))
+function _memoise(f::T) where {T<:Function}
+  zeroterm = f(0)
+  data = Dict{Int, typeof(zeroterm)}()
+  data[0] = zeroterm
+  function fmemoised(i)
+    !haskey(data, i) && (data[i] = f(i))
     return data[i]
   end
   return fmemoised, data
@@ -74,9 +77,9 @@ end
 
 function _shanks(f::T, recursion::Int, termindex::U) where {T<:Function, U<:Int}
   function _shanks_value(An1, An, An_1)
-    denominator = ((An1 - An) - (An - An_1))
-    iszero(denominator) && return An1 # then it's converged
-    return An1 - (An1 - An)^2 / denominator
+    @. denominator = ((An1 - An) - (An - An_1))
+    any(iszero.(denominator)) && return An1 # then it's converged
+    return @. An1 - (An1 - An)^2 / denominator
   end
   if recursion == 0
     An1 = f(termindex + 1)
