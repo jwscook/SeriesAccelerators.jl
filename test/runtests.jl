@@ -1,6 +1,7 @@
 using SeriesAccelerators
 using Test, BenchmarkTools
-import SpecialFunctions: factorial
+
+factorial(n) = iszero(n) ? 1 : prod((i for i in 1:n))
 
 @testset "Shanks" begin
   summand(x, i) = Float64(x^i / factorial(BigInt(i)))
