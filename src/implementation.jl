@@ -75,7 +75,7 @@ end
 
 function _shanks(f::T, recursion::Int, termindex::U) where {T<:Function, U<:Int}
   function _shanks_value(An1, An, An_1)
-    @. denominator = ((An1 - An) - (An - An_1))
+    denominator = @. ((An1 - An) - (An - An_1))
     any(iszero.(denominator)) && return An1 # then it's converged
     return @. An1 - (An1 - An)^2 / denominator
   end
