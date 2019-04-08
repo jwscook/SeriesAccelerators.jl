@@ -5,16 +5,11 @@ const default_rtol = sqrt(eps())
 Check the convergence of series by comparing the new value to the
 value of the series so far
 """
-function check_convergence(x_new::T, x_old::T,
-    rtol=default_rtol, atol=default_atol) where {T <: Number, N}
-  @assert !isnan(x_new) && !isnan(x_old) "x_new = $x_new, x_old = $x_old"
-  return isapprox(x_new, x_old, rtol=rtol, atol=atol)
-end
 function check_convergence(t_new::Array{T, N}, t_old::Array{T, N},
     rtol=default_rtol, atol=default_atol) where {T <: Number, N}
   @assert size(t_new) == size(t_old)
   @inbounds for i ∈ eachindex(t_new)
-    !check_convergence(t_new[i], t_old[i], rtol, atol) && return false
+    !isapprox(t_new[i], t_old[i], rtol, atol) && return false
   end
   return true
 end
