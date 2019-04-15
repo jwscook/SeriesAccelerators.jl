@@ -1,19 +1,5 @@
 const default_atol = eps()
 const default_rtol = sqrt(eps())
-
-"""
-Check the convergence of series by comparing the new value to the
-value of the series so far
-"""
-function check_convergence(t_new::Array{T, N}, t_old::Array{T, N},
-    rtol=default_rtol, atol=default_atol) where {T <: Number, N}
-  @assert size(t_new) == size(t_old)
-  @inbounds for i ∈ eachindex(t_new)
-    !isapprox(t_new[i], t_old[i], rtol, atol) && return false
-  end
-  return true
-end
-
 const default_initial_iterate = 5
 const default_sum_limit = 1_000_000
 const default_recursion = 1
@@ -27,7 +13,7 @@ function _seriesaccelerator(accelerator::T, series::U,
   while !isconverged && iterate < sum_limit
     new_value = accelerator(series, recursion, iterate)
     any(isfinite.(new_value)) || break
-    isconverged = check_convergence(new_value, old_value, rtol, atol)
+    isconverged = isapprox(new_value, old_value, rtol=rtol, atol=atol)
     old_value = deepcopy(new_value)
     iterate += 1
   end
