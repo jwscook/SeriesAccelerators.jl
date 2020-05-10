@@ -6,7 +6,7 @@ const default_recursion = 1
 
 function _seriesaccelerator(accelerator::T, series::U,
     recursion::Int, sum_limit::V, rtol, atol
-    ) where {T<:Function, U<:Function, V<:Int, W<:Int}
+    ) where {T<:Function, U, V<:Int, W<:Int}
   iterate = max(default_initial_iterate, recursion + 1)
   old_value = series(iterate)
   isconverged = false
@@ -20,7 +20,7 @@ function _seriesaccelerator(accelerator::T, series::U,
   return old_value, isconverged
 end
 
-function _memoise(f::T) where {T<:Function}
+function _memoise(f::T) where {T}
   data = Dict(0 => f(0))
   function fmemoised(i)
     !haskey(data, i) && (data[i] = f(i))
@@ -36,7 +36,7 @@ Shanks transformation series accelerator.
 https://en.wikipedia.org/wiki/Shanks_transformation
 
 Arguments:
-  series (optional, Function) : a function that accepts an argument, n::Int,
+  series (behaves like a Function) : a function that accepts an argument, n::Int,
     and returns the nth value in the series
   sum_limit (optional, Int) : the value at which to stop the series
     (default is 1,000,000)
@@ -54,7 +54,7 @@ function shanks(series::T,
   return _seriesaccelerator(_shanks, f, recursion, sum_limit, rtol, atol)
 end
 
-function _shanks(f::T, recursion::Int, termindex::U) where {T<:Function, U<:Int}
+function _shanks(f::T, recursion::Int, termindex::U) where {T, U<:Int}
   function _shanks_value(An1, An, An_1)
     denominator = ((An1 .- An) .- (An .- An_1))
     any(iszero.(denominator)) && return An1 # then it's converged
@@ -80,7 +80,7 @@ van Wijngaarden transformation series accelerator.
 https://en.wikipedia.org/wiki/Van_Wijngaarden_transformation
 
 Arguments:
-  series (optional, Function) : a function that accepts an argument, n::Int,
+  series (behaves like a Function) : a function that accepts an argument, n::Int,
     and returns the nth value in the series
   sum_limit (optional, Int) : the value at which to stop the series
     (default is 1,000,000)
@@ -90,7 +90,7 @@ Arguments:
 function vanwijngaarden(series::T,
     recursion::Int=default_recursion,
     sum_limit::U=default_sum_limit;
-    rtol=default_rtol, atol=default_atol) where {T<:Function, U<:Int}
+    rtol=default_rtol, atol=default_atol) where {T, U<:Int}
   @assert 0 <= recursion "$recursion"
   @assert 0 < sum_limit "$sum_limit"
   memoisedseries, data = _memoise(series)
@@ -99,7 +99,7 @@ function vanwijngaarden(series::T,
 end
 
 function _vanwijngaarden(f::T, recursion::V, sum_limit::U
-    ) where {T<:Function, U<:Int, V<:Int}
+    ) where {T, U<:Int, V<:Int}
   if recursion == 0
     return mapreduce(n -> f(n), +, 0:sum_limit)
   else
