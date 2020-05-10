@@ -1,7 +1,7 @@
 name = "SeriesAccelerators"
 uuid = "9dd7a2f8-ab8d-577c-ac83-a3992ff7c30e"
 authors = ["James Cook <cookjws@gmail.com>"]
-version = "0.2.1"
+version = "0.3.0"
 
 [compat]
 julia = "1"
