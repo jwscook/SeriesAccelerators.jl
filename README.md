@@ -1,6 +1,6 @@
 # SeriesAccelerators.jl
 
-[![Travis](https://travis-ci.com/jwscook/SeriesAccelerators.jl.svg?branch=master)](https://travis-ci.com/jwscook/SeriesAccelerators.jl)
+[![CI](https://github.com/jwscook/SeriesAccelerators.jl/actions/workflows/ci-workflow.yml/badge.svg)](https://github.com/jwscook/SeriesAccelerators.jl/actions/workflows/ci-workflow.yml)
 [![codecov](https://codecov.io/gh/jwscook/SeriesAccelerators.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/jwscook/SeriesAccelerators.jl)
 
 
