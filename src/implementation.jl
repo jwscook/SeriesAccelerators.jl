@@ -11,9 +11,8 @@ function checkconvergence(a, b, atol, rtol)
   return all(i->checkconvergence(a[i], b[i], atol, rtol), eachindex(a, b))
 end
 
-function _seriesaccelerator(accelerator::T, series::U,
-    recursion::Int, sum_limit::V, rtol, atol
-    ) where {T, U, V<:Int, W<:Int}
+function _seriesaccelerator(accelerator::T, series, recursion, sum_limit,
+    rtol, atol) where {T}
   iterate = max(default_initial_iterate, recursion + 1)
   old_value = series(iterate)
   isconverged = false
@@ -41,7 +40,7 @@ function _memoisedpartialsums(series::T) where {T}
 end
 
 """
-    shanks(series, recursion::Int=1, sum_limit::U=1_000_000; rtol=sqrt(eps()), atol=eps()) 
+    shanks(series, recursion::Int=1, sum_limit::U=1_000_000; rtol=sqrt(eps()), atol=eps())
 
 Shanks transformation series accelerator.
 https://en.wikipedia.org/wiki/Shanks_transformation
@@ -85,7 +84,7 @@ function _shanks(f::T, recursion::Int, termindex::U) where {T, U<:Int}
 end
 
 """
-    vanwijngaarden(series, recursion::Int=1, sum_limit::U=1_000_000; rtol=sqrt(eps()), atol=eps()) 
+    vanwijngaarden(series, recursion::Int=1, sum_limit::U=1_000_000; rtol=sqrt(eps()), atol=eps())
 van Wijngaarden transformation series accelerator.
 https://en.wikipedia.org/wiki/Van_Wijngaarden_transformation
 
